@@ -28,7 +28,6 @@ def displayMenu():
     clear()
     print("=========Codeforces Contest Downloader=========")
     print("=============Created by LordierClaw============")
-    print("============Updated by Team3_HaiLong===========")
     handle = settings["login"]["handle"]
     print(f"Your handle: {handle}")
     print(f"Group ID: {groupId}  \t   Contest ID: {contestId}")
@@ -64,7 +63,6 @@ def downloadAllSubmission(returnable=True):
     clear()
     remove_folders(current_dir, "download")
     print("Start scraping and saving code...")
-    #checking download folder and database.json exists
     makedirs("./download/", exist_ok=True)
     if path.exists("database.json") == False:
         print("database.json not found! Please return to the menu and get contest's information first!")
@@ -96,14 +94,13 @@ def downloadAllSubmission(returnable=True):
 
 def runDolos():
     clear()
-    print("Running dolos ...")
     lang = settings["dolos"]["language"]
     # Zip all files in download folder to dolos.zip
     shutil.make_archive("dolos", "zip", "download")
-    
+    # command = f"dolos -f web -l {lang} dolos.zip" # If you can download dolos CLI 
     command = f'docker run --init -p 3000:3000 -v "{current_dir}:/dolos" ghcr.io/dodona-edu/dolos-cli -f web -l {lang} --host 0.0.0.0 dolos.zip'
+    
     print("Running: " + command)
-
     if is_port_in_use(3000):
         print("Port 3000 is in use. Killing the container...")
         kill_container_on_port(3000)
@@ -111,19 +108,18 @@ def runDolos():
         time.sleep(2)
     chdir(path.abspath("download"))
     subprocess.Popen(command, shell=True)
-    print("Waiting for container to initialize...")
+    print("Waiting for container to initialize...") # If you get error here, please open Docker Desktop first
     time.sleep(3)
     webbrowser.open("http://localhost:3000")
     time.sleep(3)
     remove_folders(current_dir, "dolos-report-*")
 
 def kill_container_on_port(port):
-    # Lấy danh sách container đang ánh xạ đến cổng port
+    # Take the container that uses the port
     try:
         cmd = f"docker ps --filter \"publish={port}\" --format \"{{{{.ID}}}}\""
         container_ids = subprocess.check_output(cmd, shell=True, text=True).strip().splitlines()
         for cid in container_ids:
-            #print(f"Dừng container {cid} chiếm cổng {port}...")
             subprocess.call(f"docker kill {cid}", shell=True)
     except Exception as e:
         print(f"Lỗi khi dừng container: {e}")
@@ -146,7 +142,6 @@ def doEverything():
     getContestInformation(returnable=False)
     downloadAllSubmission(returnable=False)
     runDolos()
-
 def main():
     while(True):
         option = displayMenu()

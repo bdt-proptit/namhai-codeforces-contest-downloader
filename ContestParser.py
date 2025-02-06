@@ -34,7 +34,7 @@ class ContestParser:
         return data["status"], data["result"]
 
     def __getStandings(self):
-        status, data = self.__request("contest.standings")
+        data = self.__request("contest.standings")
         problems = []
         for problem in data["problems"]:
             problems.append(problem["index"])
